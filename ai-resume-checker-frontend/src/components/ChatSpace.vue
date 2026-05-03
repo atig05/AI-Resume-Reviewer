@@ -44,13 +44,21 @@ import { ref, watch, nextTick } from 'vue'
 import { postData } from '@/utils/ApiUtils'
 
 const messages = ref([
-  { sender: 'bot', text: 'Hi there! Please upload the resume, AI will give a short review' }
+  { sender: 'bot', text: 'Hi there! This is resumeAI. Please upload the resume, AI will give a short review' }
 ])
 
 const newMessage = ref('')
 const chatWindow = ref(null)
 
 async function sendMessage() {
+  const userData = localStorage.getItem('userData');
+  const parsed = JSON.parse(userData);
+  const name = parsed.value;
+  if (Date.now() > parsed.expiry) {
+      localStorage.removeItem('userData')
+      console.log('Session expired')
+      redirectToLogin()
+    }
   if (!newMessage.value.trim()) return
 
   const text = newMessage.value

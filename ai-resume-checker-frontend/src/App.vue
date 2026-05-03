@@ -1,5 +1,5 @@
 <template>
-  <ChatSpace></ChatSpace>
+  <router-view />
 </template>
 
 <script setup>

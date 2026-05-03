@@ -5,6 +5,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
@@ -15,8 +18,12 @@ public class WebClientConfig {
 
     private WebClient webClient = WebClient.create();
 
-    public <T, R> ResponseEntity<R> callGetApi(String path, ParameterizedTypeReference<R> responseType){
-        return webClient.get().uri(path)
+    public <R> ResponseEntity<R> callGetApi(
+            String path,
+            ParameterizedTypeReference<R> responseType) {
+
+        return webClient.get()
+                .uri(path)
                 .headers(httpHeaders -> buildHeaders().forEach(httpHeaders::set))
                 .retrieve()
                 .toEntity(responseType)
@@ -30,6 +37,23 @@ public class WebClientConfig {
                 .bodyValue(requestBody)
                 .retrieve()
                 .toEntity(responseType) // Retrieves full ResponseEntity<R>
+                .block();
+    }
+
+    public <R> ResponseEntity<R> callPostForm(
+            String url,
+            Map<String, String> formData,
+            Class<R> responseType) {
+        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
+
+        formData.forEach(multiValueMap::add);
+        //System.out.println(formData);
+        return webClient.post()
+                .uri(url)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(BodyInserters.fromFormData(multiValueMap))
+                .retrieve()
+                .toEntity(responseType)
                 .block();
     }
 
